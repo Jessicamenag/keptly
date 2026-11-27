@@ -617,7 +617,7 @@ body[data-view=tienda] .pile,body[data-view=tarjeta] .pile,body[data-view=enviar
 .bottom{background:#e4e7ee!important;padding-top:10px!important;box-shadow:0 -1px 0 rgba(0,0,0,.06),0 -10px 18px rgba(228,231,238,.95)}
 
 /* tag: smaller and further left so it doesn't cover the pot */
-.tag{left:-10%;bottom:10%;min-width:0;max-width:36%;padding:7px 18px 6px 12px;font-size:18px}
+.tag{left:7%;bottom:7%;min-width:0;max-width:34%;padding:7px 18px 6px 12px;font-size:18px}
 
 }
 /* caption: always one line per row, never grows over the paper */
@@ -665,6 +665,14 @@ body[data-view=enviar] .cta{background:#fff;color:var(--ink);border:1.5px solid 
  .bottom,#gift,#studio{width:min(100%,680px)}
  .circles{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+/* the paper holds the whole plant: nothing grows past its edge */
+.sheet,.sheet2{top:3cqw}
+
+/* tag lives on the paper, hole never covers the text */
+.tag{left:7%;bottom:6%;min-width:0;max-width:40%;padding:7px 16px 6px 24px;font-size:18px}
+.tag{white-space:nowrap;max-width:none;font-size:clamp(13px,5.6cqw,18px);left:6%;bottom:5%}
+.tag small{font-size:clamp(9px,3.4cqw,12px)}
 </style>
 </head>
 <body>
@@ -1231,7 +1239,7 @@ function Scene(el){
    tag.classList.toggle('on',text!==null);
    if(text===null)return;
    tag.className='tag on f-'+font+(stk!=='none'?' hs':'');tag.style.background=paper;tag.style.color=tcol||'#3e3a35';
-   if(typeof gx==='number'&&typeof gy==='number'){tag.style.left=gx+'%';tag.style.top=gy+'%';tag.style.bottom='auto'}else{tag.style.left='';tag.style.top='';tag.style.bottom=''}
+   if(typeof gx==='number'&&typeof gy==='number'){tag.style.left=Math.min(Math.max(gx,7),66)+'%';tag.style.top=Math.min(Math.max(gy,6),86)+'%';tag.style.bottom='auto'}else{tag.style.left='';tag.style.top='';tag.style.bottom=''}
    tag.innerHTML='<small>'+esc(BRAND)+'</small>'+esc(text)+(stk!=='none'?`<svg class="ic ti"><use href="#${STKI[stk]}"/></svg>`:'');
   },
   memo(on,html){memo.classList.toggle('on',!!on);if(on)memo.innerHTML=html},
@@ -1823,7 +1831,7 @@ route();startTimer();
  });
  tg.addEventListener('pointermove',e=>{
   if(!d||e.pointerId!==d.id)return;
-  const x=clamp((e.clientX-d.dx-d.r.left)/d.r.width*100,-15,90),y=clamp((e.clientY-d.dy-d.r.top)/d.r.height*100,-5,92);
+  const tw=tg.offsetWidth/d.r.width*100,th2=tg.offsetHeight/d.r.height*100,x=clamp((e.clientX-d.dx-d.r.left)/d.r.width*100,7,Math.max(7,93-tw)),y=clamp((e.clientY-d.dy-d.r.top)/d.r.height*100,6,Math.max(6,97-th2));
   S.gx=x;S.gy=y;tg.style.left=x+'%';tg.style.top=y+'%';tg.style.bottom='auto';
  });
  const end=e=>{if(!d)return;d=null;tg.classList.remove('drag');save();sfx('pop')};

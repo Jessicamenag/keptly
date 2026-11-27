@@ -166,7 +166,7 @@ function Scene(el){
    tag.classList.toggle('on',text!==null);
    if(text===null)return;
    tag.className='tag on f-'+font+(stk!=='none'?' hs':'');tag.style.background=paper;tag.style.color=tcol||'#3e3a35';
-   if(typeof gx==='number'&&typeof gy==='number'){tag.style.left=gx+'%';tag.style.top=gy+'%';tag.style.bottom='auto'}else{tag.style.left='';tag.style.top='';tag.style.bottom=''}
+   if(typeof gx==='number'&&typeof gy==='number'){tag.style.left=Math.min(Math.max(gx,7),66)+'%';tag.style.top=Math.min(Math.max(gy,6),86)+'%';tag.style.bottom='auto'}else{tag.style.left='';tag.style.top='';tag.style.bottom=''}
    tag.innerHTML='<small>'+esc(BRAND)+'</small>'+esc(text)+(stk!=='none'?`<svg class="ic ti"><use href="#${STKI[stk]}"/></svg>`:'');
   },
   memo(on,html){memo.classList.toggle('on',!!on);if(on)memo.innerHTML=html},
