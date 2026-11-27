@@ -228,17 +228,24 @@ function stUi(){
  $('stUndo').disabled=!ST.undo.length;$('stRedo').disabled=!ST.redo.length;$('stClear').disabled=!ST.strokes.length;
 }
 const stMirror=s=>s.t===4?Object.assign({},s,{x:ST.W-s.x}):Object.assign({},s,{p:s.p.map(q=>[ST.W-q[0],q[1]])});
-function stRedraw(){
- const s=$('sStk');if(s)s.innerHTML=strokesSVG(ST.strokes,ST.kind);
- const l=$('sLive');if(l)l.innerHTML=ST.cur?strokeSVG(ST.cur,ST.kind)+(ST.sym?strokeSVG(stMirror(ST.cur),ST.kind):''):'';
- const sh=$('sShade');if(sh&&!ST.drawing){const L=potLayers(potCfg(Object.assign({},S,{pw:[]})),'st'),paint=L.below+strokesSVG(ST.strokes,'pot');sh.innerHTML=paint?potShade('st',S.pc,paint):''}
+function stLiveNow(){ST.raf=0;const l=$('sLive');if(l)l.innerHTML=ST.cur?strokeSVG(ST.cur,ST.kind)+(ST.sym?strokeSVG(stMirror(ST.cur),ST.kind):''):''}
+/* while drawing only the stroke in progress is repainted, once per frame, on its own layer */
+function stLive(){if(!ST.raf)ST.raf=requestAnimationFrame(stLiveNow)}
+function stRedraw(added){
+ if(ST.raf){cancelAnimationFrame(ST.raf);ST.raf=0}
+ const s=$('sStk');if(s){if(added)s.insertAdjacentHTML('beforeend',strokesSVG(added,ST.kind));else s.innerHTML=strokesSVG(ST.strokes,ST.kind)}
+ stLiveNow();
+ const sh=$('sShade');if(sh&&!ST.drawing){clearTimeout(ST.shT);ST.shT=setTimeout(stShade,added?220:0)}
  const sy=$('stSym');if(sy)sy.setAttribute('aria-pressed',!!ST.sym);
  stUi();
+}
+/* the pot's shading over the drawing is rebuilt after a short pause, not mid-gesture */
+function stShade(){if(!ST.on||ST.drawing||ST.kind!=='pot')return;const sh=$('sShade');if(sh){const L=potLayers(potCfg(Object.assign({},S,{pw:[]})),'st'),paint=L.below+strokesSVG(ST.strokes,'pot');sh.innerHTML=paint?potShade('st',S.pc,paint):''}
 }
 function stFit(){
  if(!ST.on||!ST.svg)return;
  const cv=$('stCv'),cs=getComputedStyle(cv),aw=cv.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),ah=cv.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
- const sc=Math.max(.1,Math.min(aw/ST.W,ah/ST.H));ST.svg.style.width=(ST.W*sc)+'px';ST.svg.style.height=(ST.H*sc)+'px';
+ const sc=Math.max(.1,Math.min(aw/ST.W,ah/ST.H));const w=$('stW');w.style.width=(ST.W*sc)+'px';w.style.height=(ST.H*sc)+'px';
 }
 function openStudio(kind){
  ST.kind=kind;ST.W=kind==='pot'?760:400;ST.H=kind==='pot'?695:260;
@@ -246,9 +253,9 @@ function openStudio(kind){
  const cv=$('stCv');cv.className='stcv '+kind;
  if(kind==='pot'){
   const cfg=potCfg(S),L=potLayers(cfg,'st');
-  cv.innerHTML=`<svg viewBox="0 0 760 695" id="stSvg">${potDefs('st')}<image href="img/maceta_${S.pc}.webp" width="760" height="695" style="filter:hue-rotate(${S.ph}deg) brightness(${S.pb/100}) drop-shadow(0 18px 24px rgba(30,32,38,.22))"/><g clip-path="url(#sil_st)"><g>${L.below}</g><g id="sStk"></g><g id="sShade"></g><g>${L.above}</g><g id="sLive"></g></g></svg>`;
+  cv.innerHTML=`<div class="stw" id="stW"><svg viewBox="0 0 760 695" id="stSvg">${potDefs('st')}<image href="img/maceta_${S.pc}.webp" width="760" height="695" style="filter:hue-rotate(${S.ph}deg) brightness(${S.pb/100}) drop-shadow(0 18px 24px rgba(30,32,38,.22))"/><g clip-path="url(#sil_st)"><g>${L.below}</g><g id="sStk"></g><g id="sShade"></g><g>${L.above}</g></g></svg><svg viewBox="0 0 760 695" class="stlv" aria-hidden="true"><g clip-path="url(#sil_st)"><g id="sLive"></g></g></svg></div>`;
  }else{
-  cv.innerHTML=`<svg viewBox="0 0 400 260" id="stSvg"><defs>${GOLDG}${FILTERS}<clipPath id="clc"><rect width="400" height="260" rx="10"/></clipPath></defs><rect width="400" height="260" rx="10" fill="${PAPERS[S.paper]}"/><g clip-path="url(#clc)"><g id="sStk"></g><g id="sLive"></g></g><rect x="1.5" y="1.5" width="397" height="257" rx="9" fill="none" stroke="${S.paper==='noche'?'#ffffff55':'#30343b33'}" stroke-dasharray="5 5"/></svg>`;
+  cv.innerHTML=`<div class="stw" id="stW"><svg viewBox="0 0 400 260" id="stSvg"><defs>${GOLDG}${FILTERS}<clipPath id="clc"><rect width="400" height="260" rx="10"/></clipPath></defs><rect width="400" height="260" rx="10" fill="${PAPERS[S.paper]}"/><g clip-path="url(#clc)"><g id="sStk"></g></g><rect x="1.5" y="1.5" width="397" height="257" rx="9" fill="none" stroke="${S.paper==='noche'?'#ffffff55':'#30343b33'}" stroke-dasharray="5 5"/></svg><svg viewBox="0 0 400 260" class="stlv" aria-hidden="true"><g clip-path="url(#clc)"><g id="sLive"></g></g></svg></div>`;
  }
  ST.svg=$('stSvg');
  ['pointerdown','pointermove','pointerup','pointercancel'].forEach(ev=>ST.svg.addEventListener(ev,stPtr));
@@ -290,7 +297,7 @@ function stPtr(e){
   if(used(ST.strokes)>=LIM[ST.kind]){stHint(t('stOut'),true);sfx('err');return}
   stHint(t(ST.kind==='pot'?'stHintPot':'stHintCard'));
   if(ST.tool===4){stPush();ST.strokes.push({t:4,c:ST.col,w:ST.size,s:ST.stamp,x:p[0],y:p[1]});if(ST.sym)ST.strokes.push(stMirror({t:4,c:ST.col,w:ST.size,s:ST.stamp,x:p[0],y:p[1]}));stRedraw();sfx('pop');return}
-  ST.cur={t:ST.tool,c:ST.col,w:ST.size,p:[p]};ST.drawing=true;ST.lastP=p;stRedraw();return;
+  ST.cur={t:ST.tool,c:ST.col,w:ST.size,p:[p]};ST.drawing=true;ST.lastP=p;stLive();return;
  }
  if(e.type==='pointermove'){
   if(!ST.drawing&&!ST.erasing)return;e.preventDefault();
@@ -305,7 +312,7 @@ function stPtr(e){
     const n=Date.now();if(n-ST.lastS>90){ST.lastS=n;sfx('scratch',TNAME[ST.tool])}
    }else ST.lastP=p;
   }
-  stRedraw();return;
+  if(ST.drawing)stLive();return;
  }
  if(e.type==='pointerup'||e.type==='pointercancel')stEnd();
 }
@@ -313,7 +320,8 @@ function stEnd(){
  if(ST.drawing&&ST.cur){
   const a=ST.cur.p[ST.cur.p.length-1],lp=ST.lastP;
   if(lp&&Math.hypot(lp[0]-a[0],lp[1]-a[1])>1&&used(ST.strokes)+ST.cur.p.length<LIM[ST.kind])ST.cur.p.push(lp);
-  stPush();ST.strokes.push(ST.cur);if(ST.sym&&used(ST.strokes)+ST.cur.p.length<LIM[ST.kind])ST.strokes.push(stMirror(ST.cur));ST.cur=null;
+  stPush();const n0=ST.strokes.length;ST.strokes.push(ST.cur);if(ST.sym&&used(ST.strokes)+ST.cur.p.length<LIM[ST.kind])ST.strokes.push(stMirror(ST.cur));ST.cur=null;
+  ST.drawing=false;ST.erasing=false;stRedraw(ST.strokes.slice(n0));return;
  }
  ST.drawing=false;ST.erasing=false;stRedraw();
 }

@@ -676,5 +676,10 @@ body[data-view=enviar] .cta{background:#fff;color:var(--ink);border:1.5px solid 
 
 /* the whole front of the pot sits over the plant: leaves never paste over the rim */
 .potfront{clip-path:polygon(100% 21.3%,79.2% 21.3%,78.8% 22.5%,77.8% 23.6%,76.1% 24.7%,73.7% 25.8%,70.8% 26.7%,67.3% 27.5%,63.5% 28.1%,59.3% 28.5%,54.9% 28.8%,50.4% 28.9%,45.9% 28.8%,41.5% 28.5%,37.3% 28.1%,33.5% 27.5%,30.0% 26.7%,27.1% 25.8%,24.7% 24.7%,23.0% 23.6%,22.0% 22.5%,21.6% 21.3%,0% 21.3%,0% 100%,100% 100%)}
+
+/* studio: committed drawing and the live stroke on separate layers */
+.stw{position:relative;flex:none;max-width:100%;max-height:100%}
+.stw svg{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none;max-height:none}
+.stw .stlv{pointer-events:none;will-change:contents}
 </style>
 </head>
