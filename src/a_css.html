@@ -107,7 +107,7 @@ body[data-view=tienda] .lp .sh{display:none}
 .sheet2{background:rgba(40,44,52,.16);transform:translate(1cqw,1.6cqw) rotate(-1.1deg);filter:blur(.8cqw)}
 .potimg{position:absolute;width:50cqw;left:25cqw;bottom:3cqw;filter:hue-rotate(var(--ph,0deg)) brightness(var(--pb,1)) var(--cut);display:block}
 .deco{position:absolute;left:25cqw;bottom:3cqw;width:50cqw;aspect-ratio:760/695;pointer-events:none;overflow:visible}
-.plant{position:absolute;inset:0;transform-origin:50cqw 73cqw;filter:var(--cut)}
+.plant{position:absolute;inset:0;transform-origin:50cqw 77.8cqw;filter:var(--cut)}
 .plant img{position:absolute;display:block;opacity:0;max-width:none}
 .plant.fsick img{filter:sepia(calc(var(--ill,0)*.6)) saturate(calc(1 - var(--ill,0)*.45)) hue-rotate(calc(var(--ill,0)*-12deg)) brightness(calc(1 - var(--ill,0)*.08))}
 .plant.dead{filter:var(--cut) grayscale(.85) brightness(.82) sepia(.35)}
@@ -673,5 +673,8 @@ body[data-view=enviar] .cta{background:#fff;color:var(--ink);border:1.5px solid 
 .tag{left:7%;bottom:6%;min-width:0;max-width:40%;padding:7px 16px 6px 24px;font-size:18px}
 .tag{white-space:nowrap;max-width:none;font-size:clamp(13px,5.6cqw,18px);left:6%;bottom:5%}
 .tag small{font-size:clamp(9px,3.4cqw,12px)}
+
+/* the whole front of the pot sits over the plant: leaves never paste over the rim */
+.potfront{clip-path:polygon(100% 21.3%,79.2% 21.3%,78.8% 22.5%,77.8% 23.6%,76.1% 24.7%,73.7% 25.8%,70.8% 26.7%,67.3% 27.5%,63.5% 28.1%,59.3% 28.5%,54.9% 28.8%,50.4% 28.9%,45.9% 28.8%,41.5% 28.5%,37.3% 28.1%,33.5% 27.5%,30.0% 26.7%,27.1% 25.8%,24.7% 24.7%,23.0% 23.6%,22.0% 22.5%,21.6% 21.3%,0% 21.3%,0% 100%,100% 100%)}
 </style>
 </head>
